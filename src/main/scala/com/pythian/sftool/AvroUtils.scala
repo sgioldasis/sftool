@@ -1,4 +1,4 @@
-package co.datadudes.sf2hadoop
+package com.pythian.sftool
 
 import co.datadudes.wsdl2avro.WSDL2Avro.BasicNode
 import org.apache.avro.Schema

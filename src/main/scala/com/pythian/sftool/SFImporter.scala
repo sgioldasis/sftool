@@ -1,4 +1,4 @@
-package co.datadudes.sf2hadoop
+package com.pythian.sftool
 
 import better.files.{File, _}
 import com.typesafe.scalalogging.LazyLogging

@@ -1,4 +1,4 @@
-package co.datadudes.sf2hadoop
+package com.pythian.sftool
 
 import java.io.File
 
@@ -19,10 +19,10 @@ class SFImportCLIRunnerSpec extends SpecificationWithJUnit with FileMatchers {
     "produce a correct avsc file in schemas output folder" in {
 
       val command = "getschemas"
-      val outpath = "schemas"
-      val wslpath = "salesforce/wsdl.xml"
+      val outpath = "src/test/resources/schemas"
+      val wslpath = "src/test/resources/wsdl.xml"
       val recordType = "Opportunity"
-      val validationpath = "schema_validation"
+      val validationpath = "src/test/resources"
       val extention = "avsc"
 
       val config = SFImportCLIRunner.Config(command, outpath, new File(wslpath), Seq(recordType))

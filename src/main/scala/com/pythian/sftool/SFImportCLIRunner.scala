@@ -1,8 +1,8 @@
-package co.datadudes.sf2hadoop
+package com.pythian.sftool
 
 import java.io.File
 
-import co.datadudes.sf2hadoop.AvroUtils._
+import AvroUtils._
 import co.datadudes.wsdl2avro.WSDL2Avro
 import com.typesafe.scalalogging.LazyLogging
 
