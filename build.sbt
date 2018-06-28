@@ -1,4 +1,4 @@
-name := "salesforce2hadoop"
+name := "sftool"
 
 organization := "co.datadudes"
 
@@ -21,10 +21,15 @@ libraryDependencies ++= Seq(
     exclude("commons-beanutils", "commons-beanutils")
     exclude("org.slf4j", "slf4j-log4j12"),
   "org.kitesdk"                 % "kite-data-core"    % "1.0.0",
+  "com.github.pathikrit" %% "better-files" % "3.5.0",
   "com.github.scopt"            %% "scopt"            % "3.3.0",
-  "org.specs2"                  %% "specs2-junit"     % "2.4.15"    % "test",
-  "org.specs2"                  %% "specs2-mock"      % "2.4.15"    % "test"
+  "org.specs2" %% "specs2-junit" % "4.2.0" % "test",
+  "org.specs2" %% "specs2-mock" % "4.2.0" % "test",
+  "org.specs2" %% "specs2-core" % "4.2.0" % "test",
+  "org.specs2" %% "specs2-matcher-extra" % "4.2.0" % "test"
 )
+
+scalacOptions in Test ++= Seq("-Yrangepos")
 
 mainClass in assembly := Some("co.datadudes.sf2hadoop.SFImportCLIRunner")
 
