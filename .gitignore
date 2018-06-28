@@ -93,3 +93,4 @@ Temporary Items
 .apdisk
 
 src/main/test/resources/schemas/
+src/main/test/resources/schemas/*
