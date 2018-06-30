@@ -1,6 +1,6 @@
 name := "sftool"
 
-organization := "co.datadudes"
+organization := "com.pythian"
 
 version := "1.2"
 
@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
 
 scalacOptions in Test ++= Seq("-Yrangepos")
 
-mainClass in assembly := Some("co.datadudes.sf2hadoop.SFImportCLIRunner")
+mainClass in assembly := Some("com.pythian.sftool.SFImportCLIRunner")
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
