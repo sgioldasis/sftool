@@ -13,11 +13,11 @@ object SFImportCLIRunner extends App with LazyLogging {
                     sfWSDL: File = new File("."),
                     records: Seq[String] = Seq())
 
-  val parser = new scopt.OptionParser[Config]("sf2hadoop") {
-    head("sf2hadoop", "1.0")
+  val parser = new scopt.OptionParser[Config]("sftool") {
+    head("sftool", "1.2")
     cmd("getschemas") required() action { (_, c) => c.copy(command = "getschemas") } text "Extract object schemas as Avro files"
     note("\n")
-    opt[String]('b', "outpath") required() action { (x, c) => c.copy(schemaOutPath = x) } text "Path for generated output files"
+    opt[String]('o', "outpath") required() action { (x, c) => c.copy(schemaOutPath = x) } text "Path for generated output files"
     opt[File]('w', "wsdl") required() valueName "<file>" action { (x, c) => c.copy(sfWSDL = x) } text "Path to Salesforce Enterprise WSDL"
     arg[String]("<record>...") optional() unbounded() action { (x, c) => c.copy(records = c.records :+ x) } text "List of Salesforce record types to import"
     help("help") text "prints this usage text"
