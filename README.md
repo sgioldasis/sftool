@@ -1,34 +1,27 @@
-Salesforce2hadoop
+Sftool
 =================
 
-_Salesforce2hadoop_ allows you to import data from Salesforce and put it in HDFS (or your local filesystem), serialised as 
-Avro. Despite its boring name, it's a powerful tool that helps you get all relevant data of your business in _one place_. 
-It only needs access to the Salesforce API using a username/password combination, and the Enterprise WSDL of your 
-Salesforce Organisation.
+_Sftool_ allows you to import metadata from Salesforce (the schemas of the Salesforce record types), convert them to Avro and put it in your local filesystem, as Avro schema (avsc) files.  
+
+It only needs access to the Enterprise WSDL of your Salesforce Organisation.
 
 Features:
 
 - Choose the type(s) of records you want to import
-- Data types are preserved by looking at the Enterprise WSDL of your Salesforce Organisation
-- Data is stored in [Avro](https://avro.apache.org/docs/current/) format, providing great compatibility with a number of tools
-- Do a complete import of your data, or incrementally import only the records that have been changed since your last import
-- Salesforce2hadoop keeps track for you of the last time each record type was imported.
-- Stores data into any filesystem that Hadoop/KiteSDK supports. Can be HDFS but also a local filesystem.
-- Built with the help of [KiteSDK](http://kitesdk.org/), Salesforce [WSC](https://github.com/forcedotcom/wsc) and our own [wsdl2avro](https://github.com/datadudes/wsdl2avro) library.
+- Data types are inferred by looking at the Enterprise WSDL of your Salesforce Organisation
+- Based on [salesforce2hadoop](https://github.com/datadudes/salesforce2hadoop)
+- Built with the help of [wsdl2avro](https://github.com/datadudes/wsdl2avro) library.
 - Built for the JVM, so works on any system that has Java 7 or greater installed
-
-More background information: http://dandydev.net/blog/getting-salesforce-data-into-hadoop
 
 ## Installation
 
-You can find compiled binaries [here on Github](https://github.com/datadudes/salesforce2hadoop/releases). Just download, 
-unpack and you're good to go.
+You can find compiled binaries [here on Github](https://github.com/sgioldasis/sftool/releases). Just download, unpack and you're good to go.
 
-If you want to build **salesforce2hadoop** yourself, you need to have [Scala](http://www.scala-lang.org/download/install.html) 
+If you want to build **Sftool** yourself, you need to have [Scala](http://www.scala-lang.org/download/install.html) 
 and [SBT](http://www.scala-sbt.org/release/tutorial/Setup.html) installed. You can then build the "fat" jar as follows:
 
 ```bash
-$ git clone https://github.com/datadudes/salesforce2hadoop.git
+$ git clone https://github.com/sgioldasis/sftool.git
 $ sbt assembly
 ```
 
@@ -36,126 +29,48 @@ The resulting jar file can be found in the `target/scala-2.11` directory.
 
 ## Usage
 
-`sf2hadoop` is a command line application that is really simple to use. If you have Java 7 or higher installed, you 
-can just use `java -jar sf2hadoop.jar` to run the application. To see what options are available, run:
+`sftool` is a command line application that is really simple to use. If you have Java 7 or higher installed, you 
+can just use `java -jar sftool.jar` to run the application. To see what options are available, run:
 
 ```bash
-$ java -jar sf2hadoop.jar --help
+$ java -jar sftool.jar --help
 ```
 
-In order for _salesforce2hadoop_ to understand the structure of your Salesforce data, it has to read the Enterprise WSDL 
+In order for _Sftool_ to understand the structure of your Salesforce data, it has to read the Enterprise WSDL 
 of your Salesforce organisation. You can find out [here](https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_quickstart_steps_generate_wsdl.htm) 
 how to generate and download it for your organisation.
 
-`sf2hadoop` has 2 commands for importing data from Salesforce: _init_ and _update_.
+`sftool` has a single command for importing metadata from Salesforce: _getschemas_.
 
-#### Initial data import
+#### Get schemas
 
-Use **init** to do an initial data import from Salesforce. For each record type a dataset will be created in HDFS 
-(or your local filesystem) and a full import of the desired record types will be done. This can take some time. You can 
-do an inital import like this:
+Use **getschemas** to import schemas from Salesforce. For each record type a schema file will be created on your local filesystem. You can get specific schemas like this:
 
 ```bash
-$ java -jar sf2hadoop.jar init -u <salesforce-username> -p <salesforce-password> -b /base/path -w /path/to/enterprise.wsdl -s /path/to/state-file recordtype1 recordtype2 ...
+$ java -jar sftool.jar getschemas --outpath /output/path --wsdl /path/to/enterprise.wsdl recordtype1 recordtype2 ...
 ```
 
-**Salesforce credentials**
+You can also get all schemas if you don't provide any specific `recordtype` argument:
 
-As you can see, it needs your Salesforce username & password to login to the Salesforce API to fetch your data. 
+```bash
+$ java -jar sftool.jar getschemas --outpath /output/path --wsdl /path/to/enterprise.wsdl
+```
 
-**Data import directory**
+**Schemas output directory**
 
-It also needs a _basePath_ where it will store all the imported data. This must be in the form of a URI that Hadoop can 
-understand. Currently salesforce2hadoop supports storing data in either HDFS or your local filesystem. URIs for these 
-options have the following format:
-
-- **HDFS:** `hdfs://hostname-of-namenode:port/path/to/dir` Port can be left out. Example URI when running `sf2hadoop` on 
-the namenode of your Hadoop cluster: `hdfs://localhost/imports/salesforce`, this will store all data on HDFS in the 
-`/imports/salesforce` directory.
-- **Local filesystem**: `file:///path/to/dir` This will store all data on your local filesystem in the `/path/to/dir` directory.
-
-Imported data will be stored under the provided base path. Data for each record type will be stored under its own 
-directory, which is the record type _in lowercase_.
+It also needs an _outPath_ where it will store all the imported schema files. Avro schemas will be stored under the provided output path. Schema for each record type will be stored under its own filename within this directory, which is the record type with a `.avsc` extention.
 
 **Record types**
 
-Provide `sf2hadoop` with the types of records you want to import from Salesforce. Specify the types by their Salesforce API names. Examples: `Account`, `Opportunity`, etc. Custom record types usually end with `__c`, for example: 
+Provide `sftool` with the types of records you want to import from Salesforce. Specify the types by their Salesforce API names. Examples: `Account`, `Opportunity`, etc. Custom record types usually end with `__c`, for example: 
 `Payment_Account__c`.
-
-**State**
-
-_Salesforce2hadoop_ will keep track of what record types have been imported at what point in time. This allows you to switch 
-to incremental imports after the initial import. To make this possible, it will save the name of each record type that 
-is imported, together with an import date. When doing an incremental update of the data (see below), it will read back 
-the import states for each record type, and only request data from Salesforce that has been created/updated since that 
-moment. After the incremental import, it will update the import date for each record type that was imported.
-
-The _statefile_ can be stored either in HDFS or on your local filesystem. As with the basePath, you have to specify the 
-path to the _statefile_ as a URI, following the guidelines above. The statefile will be created automatically, including all 
-non-existing parent directories.
-
-It is advised to store the _statefile_ on HDFS, so you can run `sf2hadoop` from any machine, without having to worry if 
-the proper _statefile_ is present.
-
-#### Incremental update
-
-Use the **update** command to do an incremental update of record types that have previously been imported:
-
-```bash
-$ java -jar sf2hadoop.jar update -u <salesforce-username> -p <salesforce-password> -b /base/path -w /path/to/enterprise.wsdl -s /path/to/state-file recordtype1 recordtype2 ...
-```
-
-The parameters are the same as with the **init** command.
-
-Record types that have not been previously initialized (no initial import has been done), will be skipped, and the output 
-will tell you so.
-
-Due to the limitations of the Salesforce API, `sf2hadoop` can only go back 30 days in the past when doing an incremental 
-update. Trying an incremental import over a longer timespan, might result in errors or incomplete data, so it is advised 
-to do an update at least monthly.
-
-## Recipies
-
-Here are some recipies to make the most out of _salesforce2hadoop_.
-
-#### Import data into Hive/Impala
-
-Once you've imported Salesforce data into HDFS using `sf2hadoop`, you can then create a _Hive_ table backed by the 
-imported data (in Avro format) by running the following command in the Hive shell:
-
-```
-CREATE EXTERNAL TABLE <tablename>
-    ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
-    STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
-    OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'
-    LOCATION '/base/path/recordtype_in_lowercase'
-    TBLPROPERTIES ('avro.schema.url'='hdfs:///base/path/recordtype_in_lowercase/.metadata/schema.avsc');
-```
-
-This table will also be available in Impala (you might have to do a `INVALIDATE METADATA` for the table to show up). 
-The reason to create it in Hive instead of in Impala directly, is that Hive can infer the table's schema from the Avro 
-schema for you.
-
-#### Update Impala table after incremental import
-
-Each time you do an incremental import of data for which you have created a Hive/Impala table, you have to tell Impala 
-that new data is available by running the following command in the Impala shell: `REFRESH <tablename>`
-
-## Future plans
-
-Some random TODOs:
-
-- Allow creating Hive tables directly by using the facilities provided by KiteSDK
-- Support other Hadoop-compliant filesystems, like S3
 
 ## Contributing
 
-You're more than welcome to create issues for any bugs you find and ideas you have. Contributions in the form of pull 
-requests are also very much appreciated!
+You're more than welcome to create issues for any bugs you find and ideas you have. Contributions in the form of pull requests are also very much appreciated!
 
 ## Authors
 
-Salesforce2hadoop was created with passion by:
+Sftool was created by:
 
-- [Daan Debie](https://github.com/DandyDev) - [Website](http://dandydev.net/)
-- [Marcel Krcah](https://github.com/mkrcah) - [Website](http://marcelkrcah.net/)
+- [Savas Gioldasis](https://github.com/sgioldasis) - [LinkedIn](https://www.linkedin.com/in/sgioldasis/)
